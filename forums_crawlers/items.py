@@ -20,7 +20,7 @@ class Discussion(Item):
     post_id = Field(output_processor=TakeFirst())
     url = Field(output_processor=TakeFirst())
     datetimes = Field(input_processor=MapCompose(dateparser.parse))
-    usernames = Field()
+    user_ids = Field()
     user_post_count = Field(input_processor=MapCompose(to_int))
     bodys = Field(
         input_processor=MapCompose(

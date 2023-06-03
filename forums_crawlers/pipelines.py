@@ -20,7 +20,7 @@ class ItemCheckPipeline:
         item = ItemAdapter(item)
         length = [
             len(item.get("datetimes")),
-            len(item.get("usernames")),
+            len(item.get("user_ids")),
             len(item.get("user_post_count")),
             len(item.get("bodys")),
             len(item.get("replies")),
@@ -68,7 +68,7 @@ class MongoPipeline:
                     "post_id": discussion.get("post_id"),
                     "url": discussion.get("url"),
                     "datetime": discussion.get("datetimes")[i],
-                    "username": discussion.get("usernames")[i],
+                    "user_id": discussion.get("user_ids")[i],
                     "user_post_count": discussion.get("user_post_count")[i],
                     "body": discussion["bodys"][i],
                     "reply": discussion.get("replies")[i],
