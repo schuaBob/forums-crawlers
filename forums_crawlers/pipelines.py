@@ -17,15 +17,16 @@ load_dotenv()
 
 class ItemCheckPipeline:
     def process_item(self, item, spider):
-        item = ItemAdapter(item).asdict()
+        item = ItemAdapter(item)
         length = [
-            len(item["datetimes"]),
-            len(item["usernames"]),
-            len(item["user_post_count"]),
-            len(item["bodys"]),
-            len(item["replies"]),
+            len(item.get("datetimes")),
+            len(item.get("usernames")),
+            len(item.get("user_post_count")),
+            len(item.get("bodys")),
+            len(item.get("replies")),
         ]
-        print(length.count(length[0]) == len(length))
+        if length.count(length[0]) != len(length):
+            spider.log(f"{item.get('url')} - {length}", logging.ERROR)
 
 
 class MongoPipeline:
@@ -73,5 +74,4 @@ class MongoPipeline:
                     "reply": discussion.get("replies")[i],
                 }
             )
-
         return item
