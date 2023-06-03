@@ -4,12 +4,16 @@ from scrapy.spiders import CrawlSpider
 from scrapy.loader import ItemLoader
 from forums_crawlers.items import Discussion
 
+
 class AlzconnectedSpider(CrawlSpider):
     name = "alzconnected"
     allowed_domains = ["alzconnected.org"]
+    collection_name = "AlzConnected-v2"
 
     def start_requests(self):
-        for page in range(int(self.start_page), int(self.start_page) + int(self.page_num)):
+        for page in range(
+            int(self.start_page), int(self.start_page) + int(self.page_num)
+        ):
             yield scrapy.Request(
                 url=f"https://alzconnected.org/categories/{self.category}/p{page}",
                 callback=self.get_discussions,
@@ -23,7 +27,6 @@ class AlzconnectedSpider(CrawlSpider):
         )
         for link in linkExtractor.extract_links(response):
             yield scrapy.Request(url=link.url, callback=self.parse_discussion)
-
 
     def parse_discussion(self, response):
         iL = ItemLoader(item=Discussion(), selector=response.css("section.MainContent"))

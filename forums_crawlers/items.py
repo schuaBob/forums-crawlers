@@ -5,15 +5,26 @@
 
 from scrapy import Field, Item
 from itemloaders.processors import TakeFirst, MapCompose, Compose
-from w3lib.html import remove_tags, replace_entities, replace_escape_chars, strip_html5_whitespace
+from w3lib.html import (
+    remove_tags,
+    replace_entities,
+    replace_escape_chars,
+    strip_html5_whitespace,
+)
 from forums_crawlers.processors import to_int, is_reply
+import dateparser
+
 
 class Discussion(Item):
-    title = Field(input_processor=TakeFirst())
-    post_id = Field(input_processor=TakeFirst())
-    url = Field(input_processor=TakeFirst())
-    datetimes = Field()
+    title = Field(output_processor=TakeFirst())
+    post_id = Field(output_processor=TakeFirst())
+    url = Field(output_processor=TakeFirst())
+    datetimes = Field(input_processor=MapCompose(dateparser.parse))
     usernames = Field()
     user_post_count = Field(input_processor=MapCompose(to_int))
-    bodys = Field(input_processor=MapCompose(remove_tags, replace_entities, replace_escape_chars, strip_html5_whitespace))
-    replies = Field(input_processor=Compose(is_reply))
+    bodys = Field(
+        input_processor=MapCompose(
+            remove_tags, replace_entities, replace_escape_chars, strip_html5_whitespace
+        )
+    )
+    replies = Field(input_processor=is_reply)

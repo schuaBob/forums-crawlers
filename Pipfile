@@ -5,8 +5,12 @@ name = "pypi"
 
 [packages]
 scrapy = "*"
+pymongo = "*"
+python-dotenv = "*"
+dateparser = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.10"
