@@ -26,7 +26,8 @@ class ItemCheckPipeline:
             len(item.get("replies")),
         ]
         if length.count(length[0]) != len(length):
-            spider.log(f"{item.get('url')} - {length}", logging.ERROR)
+            spider.log(f"{item.get('url')} - {length}", logging.INFO)
+
 
 
 class MongoPipeline:

@@ -3,6 +3,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider
 from scrapy.loader import ItemLoader
 from forums_crawlers.items import Discussion
+import logging
 
 
 class AlzconnectedSpider(CrawlSpider):
@@ -25,10 +26,13 @@ class AlzconnectedSpider(CrawlSpider):
             restrict_css="section.MainContent ul li",
             unique=True,
         )
-        for link in linkExtractor.extract_links(response):
+        links = linkExtractor.extract_links(response)
+        self.log(f"Links: {len(links)}, {response.url}", logging.INFO)
+        for link in links:
             yield scrapy.Request(url=link.url, callback=self.parse_discussion)
 
     def parse_discussion(self, response):
+        self.log(f"{response.url}", logging.INFO)
         iL = ItemLoader(item=Discussion(), selector=response.css("section.MainContent"))
         iL.add_css("title", ".PageTitle h1::text")
         iL.add_value("post_id", response.url, re=r"discussion/(\d+)/")
