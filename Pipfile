@@ -8,6 +8,7 @@ scrapy = "*"
 pymongo = "*"
 python-dotenv = "*"
 dateparser = "*"
+scrapy-fake-useragent = "*"
 
 [dev-packages]
 black = "*"

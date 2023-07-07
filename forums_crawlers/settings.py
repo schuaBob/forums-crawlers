@@ -14,7 +14,9 @@ NEWSPIDER_MODULE = "forums_crawlers.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = "forums_crawlers (+http://www.yourdomain.com)"
+USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/113.0"
+)
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -38,8 +40,18 @@ ROBOTSTXT_OBEY = False
 
 # Override the default request headers:
 # DEFAULT_REQUEST_HEADERS = {
-#    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-#    "Accept-Language": "en",
+#     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+#     "Accept-Language": "en-US,en;q=0.5",
+#     "Accept-Encoding": "gzip, deflate, br",
+#     "Connection": "keep-alive",
+#     "Cache-Control": "max-age=0",
+#     "Upgrade-Insecure-Requests": "1",
+#     "TE": "trailers",
+#     "Sec-Fetch-Site": "same-origin",
+#     "Sec-Fetch-Mode": "navigate",
+#     "Sec-Fetch-Dest": "document",
+#     "Refer": "https://alzconnected.org/categories/i-am-a-caregiver-(general-topics)",
+#     "HOST": "alzconnected.org",
 # }
 
 # Enable or disable spider middlewares
@@ -50,9 +62,19 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    "forums_crawlers.middlewares.ForumsCrawlersDownloaderMiddleware": 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    #    "forums_crawlers.middlewares.ForumsCrawlersDownloaderMiddleware": 543,
+    "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
+    "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
+    "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 100,
+    "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 101,
+}
+
+FAKEUSERAGENT_PROVIDERS = [
+    "scrapy_fake_useragent.providers.FakeUserAgentProvider",  # this is the first provider we'll try
+    "scrapy_fake_useragent.providers.FakerProvider",  # if FakeUserAgentProvider fails, we'll use faker to generate a user-agent string for us
+    "scrapy_fake_useragent.providers.FixedUserAgentProvider",  # fall back to USER_AGENT value
+]
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -64,6 +86,7 @@ ROBOTSTXT_OBEY = False
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "forums_crawlers.pipelines.MongoPipeline": 100,
+    # "forums_crawlers.pipelines.ItemCheckPipeline": 200,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
