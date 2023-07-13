@@ -4,15 +4,18 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 from scrapy import Field, Item
-from itemloaders.processors import TakeFirst, MapCompose, Compose
+from itemloaders.processors import TakeFirst, MapCompose
 from w3lib.html import (
     remove_tags,
     replace_entities,
     replace_escape_chars,
     strip_html5_whitespace,
 )
-from forums_crawlers.processors import to_int, is_reply
+from forums_crawlers.processors import to_int, is_reply, PMIDtoPDFUrl
+from dotenv import load_dotenv
 import dateparser
+
+load_dotenv()
 
 
 class Discussion(Item):
@@ -28,3 +31,13 @@ class Discussion(Item):
         )
     )
     replies = Field(input_processor=is_reply)
+
+
+class Information(Item):
+    title = Field(output_processor=TakeFirst())
+    authors = Field(output_processor=TakeFirst())
+    year = Field(input_processor=MapCompose(int), output_processor=TakeFirst())
+    pmid = Field(input_processor=MapCompose(strip_html5_whitespace), output_processor=TakeFirst())
+    url = Field(output_processor=PMIDtoPDFUrl())
+    paragraphs = Field()
+    keywords = Field(output_processor=TakeFirst())
