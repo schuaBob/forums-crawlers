@@ -3,13 +3,18 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider
 from scrapy.loader import ItemLoader
 from forums_crawlers.items import Discussion
-import logging
+from forums_crawlers.pipelines import MongoPipeline
 
 
 class AlzconnectedSpider(CrawlSpider):
     name = "alzconnected"
     allowed_domains = ["alzconnected.org"]
     collection_name = "AlzConnected-v2"
+    custom_settings = {
+        "ITEM_PIPELINES": {
+            MongoPipeline: 100,
+        }
+    }
 
     def start_requests(self):
         for page in range(
@@ -21,18 +26,17 @@ class AlzconnectedSpider(CrawlSpider):
             )
 
     def get_discussions(self, response):
-        linkExtractor = LinkExtractor(
-            allow=(r"discussion/\d+/\S+",),
+        links = LinkExtractor(
+            allow=(r"/discussion/\d+/\S+",),
             restrict_css="section.MainContent ul li",
             unique=True,
-        )
-        links = linkExtractor.extract_links(response)
-        self.log(f"Links: {len(links)}, {response.url}", logging.INFO)
+        ).extract_links(response)
+        self.logger.info(f"Links: {len(links)}, {response.url}")
         for link in links:
-            yield scrapy.Request(url=link.url, callback=self.parse_discussion)
+            yield scrapy.Request(url=link.url, callback=self.parse_item)
 
-    def parse_discussion(self, response):
-        self.log(f"{response.url}", logging.INFO)
+    def parse_item(self, response):
+        self.logger.info(f"{response.url}")
         iL = ItemLoader(item=Discussion(), selector=response.css("section.MainContent"))
         iL.add_css("title", ".PageTitle h1::text")
         iL.add_value("post_id", response.url, re=r"discussion/(\d+)/")
