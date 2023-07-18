@@ -87,10 +87,13 @@ class EncodeTexts:
 
 class MilvusStore:
     def open_spider(self, spider):
+        self.alias = os.environ.get("MILVUS_ALIAS")
+        self.host = os.environ.get("MILVUS_HOST")
+        self.port = os.environ.get("MILVUS_PORT")
         connections.connect(
-            alias=os.environ.get("MILVUS_ALIAS"),
-            host=os.environ.get("MILVUS_HOST"),
-            port=os.environ.get("MILVUS_PORT"),
+            alias=self.alias,
+            host=self.host,
+            port=self.port,
         )
         if utility.has_collection(spider.collection_name):
             Collection(spider.collection_name).drop()
@@ -115,8 +118,8 @@ class MilvusStore:
                     n = temp - indexed
                     indexed = temp
                     pbar.update(n)
-        utility.wait_for_index_building_complete(spider.collection_name)
-        connections.disconnect(self._alias)
+            utility.wait_for_index_building_complete(spider.collection_name)
+        connections.disconnect(self.alias)
 
     def process_item(self, item, spider):
         info = ItemAdapter(item)
