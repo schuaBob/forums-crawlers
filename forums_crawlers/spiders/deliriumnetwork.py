@@ -5,20 +5,29 @@ from scrapy.spiders import CrawlSpider
 from urllib.parse import urlencode
 from scrapy.loader import ItemLoader
 from forums_crawlers.items import Information
-from forums_crawlers.pipelines import DownloadPubMedPDF, ParsePDF, MilvusStore, DownloadPubMedPDF2
-import logging
+from forums_crawlers.pipelines import (
+    ParsePDFFromFiles,
+    MilvusStore,
+    DownloadPubMedPDF,
+    EncodeTexts,
+)
 from os.path import dirname, join
+from schemas.MilvusSchemas import DeliriumNetworkSchema
+
 
 class DeliriumnetworkSpider(CrawlSpider):
     name = "deliriumnetwork"
     allowed_domains = ["deliriumnetwork.org"]
     collection_name = "deliriumnetwork"
+    schema = DeliriumNetworkSchema()
+    transformer_name = "all-MiniLM-L6-v2"
     PDFDIR = join(dirname(dirname(__file__)), "pdf", name)
     custom_settings = {
         "ITEM_PIPELINES": {
             DownloadPubMedPDF: 100,
-            # ParsePDF:101,
-            # MilvusStore: 102,
+            ParsePDFFromFiles: 101,
+            EncodeTexts: 102,
+            MilvusStore: 103,
         }
     }
 
@@ -26,6 +35,7 @@ class DeliriumnetworkSpider(CrawlSpider):
         for page in range(
             int(self.start_page), int(self.start_page) + int(self.page_num)
         ):
+            self.logger.info(f"crawling page {page}")
             params = urlencode(dict(listpage=page, instance=2))
             yield scrapy.Request(
                 url=f"https://deliriumnetwork.org/bibliography/?{params}",
@@ -36,7 +46,6 @@ class DeliriumnetworkSpider(CrawlSpider):
         links = LinkExtractor(
             allow=(r"\?pdb=\d+"), restrict_css="table.pages tbody tr", unique=True
         ).extract_links(response)
-        self.log(f"Links: {len(links)}, {response.url}", logging.INFO)
         for link in links:
             yield scrapy.Request(url=link.url, callback=self.parse_item)
 
@@ -45,7 +54,8 @@ class DeliriumnetworkSpider(CrawlSpider):
         iL.add_css("title", "dd.first_name::text")
         iL.add_css("authors", "dd.last_name::text")
         iL.add_css("year", "dd.address::text")
-        iL.add_css("pmid", "dd.country a::text", re=r"^(?![a-zA-Z])\s*\d+")
-        iL.add_value("url", iL.get_output_value("pmid"))
+        iL.add_css("pmid", "dd.country a::attr(href)", re=r"\/([^a-zA-Z\/]+)$")
+        iL.add_value("file_urls", iL.get_output_value("pmid"))
         iL.add_css("keywords", "dd.zip p::text")
-        return iL.load_item()
+        item = iL.load_item()
+        return item
