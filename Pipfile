@@ -9,6 +9,10 @@ pymongo = "*"
 python-dotenv = "*"
 dateparser = "*"
 scrapy-fake-useragent = "*"
+biopython = "*"
+pypdf = "*"
+pymilvus = "*"
+sentence-transformers = "*"
 
 [dev-packages]
 black = "*"
