@@ -11,7 +11,7 @@ from w3lib.html import (
     replace_escape_chars,
     strip_html5_whitespace,
 )
-from forums_crawlers.processors import to_int, is_reply, PMIDtoPDFUrl
+from forums_crawlers.processors import to_int, is_reply, IDtoPDFUrl
 from dotenv import load_dotenv
 import dateparser
 
@@ -37,8 +37,8 @@ class Information(Item):
     title = Field(output_processor=TakeFirst())
     authors = Field(output_processor=TakeFirst())
     year = Field(input_processor=MapCompose(int), output_processor=TakeFirst())
-    pmid = Field(output_processor=TakeFirst())
-    file_urls = Field(output_processor=PMIDtoPDFUrl())
+    id = Field(output_processor=TakeFirst())
+    file_urls = Field(input_processor=MapCompose(IDtoPDFUrl()))
     files = Field()
     paragraphs = Field()
     embeddings = Field()

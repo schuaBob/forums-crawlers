@@ -24,7 +24,7 @@ load_dotenv()
 
 class DownloadPubMedPDF(FilesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
-        path = os.path.join("pdf", "pubmed", f"{item.get('pmid')}.pdf")
+        path = os.path.join("pdf", "pubmed", f"{item.get('id')}.pdf")
         return path
 
     def get_media_requests(self, item, info):
@@ -45,7 +45,7 @@ class ParsePDFFromFiles:
     def process_item(self, item, spider):
         information = ItemAdapter(item)
         if not information["files"]:
-            raise DropItem(f"No pmc pdf for pmid:{information.get('pmid')}")
+            raise DropItem(f"No pmc pdf for id:{information.get('id')}")
 
         fullfilename = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),

@@ -54,8 +54,8 @@ class DeliriumnetworkSpider(CrawlSpider):
         iL.add_css("title", "dd.first_name::text")
         iL.add_css("authors", "dd.last_name::text")
         iL.add_css("year", "dd.address::text")
-        iL.add_css("pmid", "dd.country a::attr(href)", re=r"\/([^a-zA-Z\/]+)$")
-        iL.add_value("file_urls", iL.get_output_value("pmid"))
+        iL.add_css("id", "dd.country a::attr(href)", re=r"[^\/]+$")
+        iL.add_value("file_urls", iL.get_output_value("id"))
         iL.add_css("keywords", "dd.zip p::text")
         item = iL.load_item()
         return item
